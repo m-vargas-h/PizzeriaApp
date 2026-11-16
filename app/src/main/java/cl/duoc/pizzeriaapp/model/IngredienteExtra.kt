@@ -1,0 +1,12 @@
+package cl.duoc.pizzeriaapp.model
+
+// Ingrediente adicional: descuenta 1 unidad de ese ingrediente del inventario
+// Sin @Promocionable: no participa en promociones
+class IngredienteExtra(
+    val ingrediente: String,
+    precio: Long
+) : Producto("Extra $ingrediente", precio, mapOf(ingrediente to 1)) {
+
+    override val categoria: CategoriaProducto
+        get() = CategoriaProducto.INGREDIENTE
+}
