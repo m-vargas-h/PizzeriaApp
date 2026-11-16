@@ -6,11 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import cl.duoc.pizzeriaapp.ui.screens.PizzeriaScreen
 import cl.duoc.pizzeriaapp.ui.theme.PizzeriaAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +23,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             PizzeriaAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
+                    // La pantalla principal muestra el saludo y la lógica integrada de la pizzería
+                    PizzeriaScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -33,6 +37,8 @@ class MainActivity : ComponentActivity() {
 fun Greeting(modifier: Modifier = Modifier) {
     Text(
         text = "Bienvenidos a la mejor pizzería de la ciudad",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold,
         modifier = modifier
     )
 }
