@@ -31,7 +31,7 @@ import cl.duoc.pizzeriaapp.model.PeriodoPromocion
 import cl.duoc.pizzeriaapp.model.Producto
 import cl.duoc.pizzeriaapp.model.Usuario
 import cl.duoc.pizzeriaapp.service.procesarPedido
-import cl.duoc.pizzeriaapp.utils.esPromocionable
+import cl.duoc.pizzeriaapp.annotations.esPromocionable
 import cl.duoc.pizzeriaapp.utils.formatearFecha
 import cl.duoc.pizzeriaapp.utils.formatearPesos
 

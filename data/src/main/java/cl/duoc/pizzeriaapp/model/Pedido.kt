@@ -3,7 +3,7 @@ package cl.duoc.pizzeriaapp.model
 import java.time.LocalDate
 import cl.duoc.pizzeriaapp.utils.aplicarPorcentaje
 import cl.duoc.pizzeriaapp.utils.dividirRedondeado
-import cl.duoc.pizzeriaapp.utils.esPromocionable
+import cl.duoc.pizzeriaapp.annotations.esPromocionable
 
 // Pedido con varios productos; los precios ya incluyen IVA
 class Pedido(

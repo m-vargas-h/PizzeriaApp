@@ -1,11 +1,10 @@
-package cl.duoc.pizzeriaapp.utils
+package cl.duoc.pizzeriaapp.annotations
 
-import cl.duoc.pizzeriaapp.annotations.Promocionable
 import cl.duoc.pizzeriaapp.model.Producto
 
 // Reflection: lee la anotación @Promocionable de la clase del producto en tiempo de ejecución
-// En Android se usa la API de reflection de Java (getAnnotation), que viene incluida en la plataforma,
-// en lugar de kotlin.reflect.full, que requiere agregar la librería kotlin-reflect
+// Vive junto a @Promocionable (módulo data) porque conoce el modelo; así :utils no depende del dominio
+// Se usa la API de reflection de Java (getAnnotation), sin agregar la librería kotlin-reflect
 fun obtenerPromocion(producto: Producto): Promocionable? =
     producto.javaClass.getAnnotation(Promocionable::class.java)
 
