@@ -14,4 +14,6 @@ kotlin {
 dependencies {
     // Validaciones y formato de montos usados por el modelo y el registro
     implementation(project(":utils"))
+    // Coroutines: el repositorio expone funciones suspend y procesa la jornada fuera del hilo principal
+    implementation(libs.kotlinx.coroutines.core)
 }

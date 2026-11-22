@@ -49,6 +49,9 @@ class Registro {
 
     fun obtenerCatalogo(): List<Producto> = catalogo.toList()
 
+    // mutableSetOf crea un LinkedHashSet: conserva el orden de registro (el último es el más reciente)
+    fun obtenerClientes(): List<Cliente> = clientes.toList()
+
     // Registra una pizza nueva a partir del precio ingresado como texto
     // Un solo catch: NumberFormatException (precio no numérico) es subclase de IllegalArgumentException (precio <= 0)
     fun registrarProducto(nombre: String, precioTexto: String, ingredientes: Map<String, Int>): Producto? =

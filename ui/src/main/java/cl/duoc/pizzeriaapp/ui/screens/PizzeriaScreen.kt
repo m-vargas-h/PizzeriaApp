@@ -1,6 +1,7 @@
 package cl.duoc.pizzeriaapp.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,60 +12,40 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cl.duoc.pizzeriaapp.Greeting
-import cl.duoc.pizzeriaapp.app.Jornada
-import cl.duoc.pizzeriaapp.data.crearPedidosIniciales
-import cl.duoc.pizzeriaapp.data.registrarClientesIniciales
-import cl.duoc.pizzeriaapp.model.Cliente
+import cl.duoc.pizzeriaapp.data.EstadoPizzeria
 import cl.duoc.pizzeriaapp.model.Combo
 import cl.duoc.pizzeriaapp.model.EstadoPedido
 import cl.duoc.pizzeriaapp.model.Pedido
 import cl.duoc.pizzeriaapp.model.PeriodoPromocion
 import cl.duoc.pizzeriaapp.model.Producto
 import cl.duoc.pizzeriaapp.model.Usuario
-import cl.duoc.pizzeriaapp.service.procesarPedido
 import cl.duoc.pizzeriaapp.annotations.esPromocionable
+import cl.duoc.pizzeriaapp.ui.components.Greeting
 import cl.duoc.pizzeriaapp.utils.formatearFecha
 import cl.duoc.pizzeriaapp.utils.formatearPesos
 
-// Jornada lista para mostrar: clientes registrados y pedidos precargados ya procesados
-private class DatosJornada(val jornada: Jornada, val clientes: List<Cliente>)
-
-// Misma secuencia que la demostración de consola: cada pedido precargado se lleva hasta su estado objetivo
-// Los mensajes que imprime procesarPedido (inventario, notificaciones, despacho) se ven en Logcat
-private fun prepararJornada(): DatosJornada {
-    val jornada = Jornada()
-    val clientes = registrarClientesIniciales(jornada.registro)
-    val objetivos = listOf(
-        EstadoPedido.ENTREGADO,
-        EstadoPedido.EN_CAMINO,
-        EstadoPedido.LISTO,
-        EstadoPedido.ENTREGADO      // sin champiñones suficientes: queda rechazado
-    )
-    crearPedidosIniciales(clientes, jornada.menu).zip(objetivos).forEach { (pedido, objetivo) ->
-        jornada.agregarPedido(pedido)
-        procesarPedido(pedido, jornada.inventario, jornada.repartidores, objetivo)
-    }
-    return DatosJornada(jornada, clientes)
-}
-
 // Pantalla principal: bienvenida, menú del día, pedidos del día y usuarios registrados
+// Recibe el estado desde MainActivity (que lo observa en el ViewModel); null mientras se cargan los datos
 @Composable
-fun PizzeriaScreen(modifier: Modifier = Modifier) {
-    // remember: la jornada se prepara una sola vez, no en cada recomposición
-    val datos = remember { prepararJornada() }
-    val jornada = datos.jornada
-    val pedidos = jornada.pedidosDelDia().toList()
+fun PizzeriaScreen(estado: EstadoPizzeria?, modifier: Modifier = Modifier) {
+    if (estado == null) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    val pedidos = estado.pedidos
     // Polimorfismo: clientes y repartidores se tratan como Usuario
-    val usuarios: List<Usuario> = datos.clientes + jornada.repartidores
+    val usuarios: List<Usuario> = estado.clientes + estado.repartidores
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -75,7 +56,7 @@ fun PizzeriaScreen(modifier: Modifier = Modifier) {
         item { BannerPromocion() }
 
         item { TituloSeccion("Menú del día") }
-        items(jornada.registro.obtenerCatalogo()) { producto -> TarjetaProducto(producto) }
+        items(estado.catalogo) { producto -> TarjetaProducto(producto) }
 
         item { TituloSeccion("Pedidos del día") }
         items(pedidos) { pedido -> TarjetaPedido(pedido) }

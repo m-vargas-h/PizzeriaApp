@@ -40,8 +40,11 @@ android {
 
 dependencies {
     // Módulos del proyecto
+    implementation(project(":ui"))
     implementation(project(":data"))
     implementation(project(":utils"))
+    // MainActivity observa el LiveData del ViewModel con observeAsState
+    implementation(libs.androidx.compose.runtime.livedata)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
