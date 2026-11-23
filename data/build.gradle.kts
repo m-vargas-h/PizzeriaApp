@@ -16,4 +16,7 @@ dependencies {
     implementation(project(":utils"))
     // Coroutines: el repositorio expone funciones suspend y procesa la jornada fuera del hilo principal
     implementation(libs.kotlinx.coroutines.core)
+
+    // Pruebas unitarias de la lógica de negocio (JUnit 4, ya definido en el catálogo de versiones)
+    testImplementation(libs.junit)
 }
