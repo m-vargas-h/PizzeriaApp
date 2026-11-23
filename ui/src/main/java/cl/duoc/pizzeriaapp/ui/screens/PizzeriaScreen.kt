@@ -10,18 +10,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.pizzeriaapp.data.EstadoPizzeria
+import cl.duoc.pizzeriaapp.model.Cliente
 import cl.duoc.pizzeriaapp.model.Combo
 import cl.duoc.pizzeriaapp.model.EstadoPedido
 import cl.duoc.pizzeriaapp.model.Pedido
@@ -29,14 +35,23 @@ import cl.duoc.pizzeriaapp.model.PeriodoPromocion
 import cl.duoc.pizzeriaapp.model.Producto
 import cl.duoc.pizzeriaapp.model.Usuario
 import cl.duoc.pizzeriaapp.annotations.esPromocionable
+import cl.duoc.pizzeriaapp.ui.components.FormularioCliente
+import cl.duoc.pizzeriaapp.ui.components.FormularioPedido
 import cl.duoc.pizzeriaapp.ui.components.Greeting
+import cl.duoc.pizzeriaapp.ui.components.ResumenCard
 import cl.duoc.pizzeriaapp.utils.formatearFecha
 import cl.duoc.pizzeriaapp.utils.formatearPesos
 
-// Pantalla principal: bienvenida, menú del día, pedidos del día y usuarios registrados
+// Pantalla principal: bienvenida, resumen, acciones, menú del día, pedidos del día y usuarios registrados
 // Recibe el estado desde MainActivity (que lo observa en el ViewModel); null mientras se cargan los datos
+// Las acciones de los formularios se delegan al ViewModel mediante los callbacks
 @Composable
-fun PizzeriaScreen(estado: EstadoPizzeria?, modifier: Modifier = Modifier) {
+fun PizzeriaScreen(
+    estado: EstadoPizzeria?,
+    modifier: Modifier = Modifier,
+    onRegistrarCliente: (nombre: String, telefono: String, correo: String, direccion: String) -> Unit = { _, _, _, _ -> },
+    onCrearPedido: (cliente: Cliente, producto: Producto, cantidad: Int, notas: String) -> Unit = { _, _, _, _ -> }
+) {
     if (estado == null) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -44,6 +59,9 @@ fun PizzeriaScreen(estado: EstadoPizzeria?, modifier: Modifier = Modifier) {
         return
     }
     val pedidos = estado.pedidos
+    // rememberSaveable: el formulario abierto se mantiene al rotar la pantalla
+    var mostrarFormularioCliente by rememberSaveable { mutableStateOf(false) }
+    var mostrarFormularioPedido by rememberSaveable { mutableStateOf(false) }
     // Polimorfismo: clientes y repartidores se tratan como Usuario
     val usuarios: List<Usuario> = estado.clientes + estado.repartidores
 
@@ -53,6 +71,20 @@ fun PizzeriaScreen(estado: EstadoPizzeria?, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item { Greeting() }
+        item { ResumenCard(estado) }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(onClick = { mostrarFormularioCliente = true }, modifier = Modifier.weight(1f)) {
+                    Text("Registrar cliente")
+                }
+                Button(onClick = { mostrarFormularioPedido = true }, modifier = Modifier.weight(1f)) {
+                    Text("Nuevo pedido")
+                }
+            }
+        }
         item { BannerPromocion() }
 
         item { TituloSeccion("Menú del día") }
@@ -64,6 +96,21 @@ fun PizzeriaScreen(estado: EstadoPizzeria?, modifier: Modifier = Modifier) {
 
         item { TituloSeccion("Usuarios registrados") }
         items(usuarios) { usuario -> FilaUsuario(usuario) }
+    }
+
+    if (mostrarFormularioCliente) {
+        FormularioCliente(
+            onRegistrar = onRegistrarCliente,
+            onCerrar = { mostrarFormularioCliente = false }
+        )
+    }
+    if (mostrarFormularioPedido) {
+        FormularioPedido(
+            clientes = estado.clientes,
+            productos = estado.catalogo,
+            onCrear = onCrearPedido,
+            onCerrar = { mostrarFormularioPedido = false }
+        )
     }
 }
 
@@ -111,7 +158,7 @@ private fun TarjetaProducto(producto: Producto) {
             // Anotaciones: @Promocionable leída con reflection
             if (esPromocionable(producto)) {
                 Text(
-                    text = "★ Promocionable",
+                    text = "★ Aplica ${PeriodoPromocion.NOMBRE}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )

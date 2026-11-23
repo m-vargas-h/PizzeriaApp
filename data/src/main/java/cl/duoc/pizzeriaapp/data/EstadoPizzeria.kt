@@ -12,4 +12,11 @@ data class EstadoPizzeria(
     val pedidos: List<Pedido>,
     val clientes: List<Cliente>,
     val repartidores: List<Repartidor>
-)
+) {
+    // Datos del mensaje de resumen de la pantalla inicial
+    val totalClientes: Int get() = clientes.size
+    val totalPedidos: Int get() = pedidos.size
+
+    // Registro conserva el orden de registro: el último de la lista es el más reciente
+    val ultimoCliente: Cliente? get() = clientes.lastOrNull()
+}
